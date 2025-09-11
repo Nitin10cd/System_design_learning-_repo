@@ -7,85 +7,162 @@ using namespace std;
       // => in manual car we have function change-gear(), in electric we have the function charge-battery()
 // => or this scenerio make a uml diagram (class diagram) , pick either from the inheritance or the composition (if composition so which)
 
-// both the excel draw img and the code file 
+// both the excel draw img and the code file  
 
 
 // best way to do this is using the inheritance 
 // so first using that then using composiotion
-class Car {
-    protected:
-        string make;
-        string model;
 
-    public:
-        // costructor
-        Car(string mk , string ml): make(mk), model(ml) {
+//------------ USING THE INHERITANCE ------------
 
-        }
+// class Car {
+//     protected:
+//         string make;
+//         string model;
+
+//     public:
+//         // costructor
+//         Car(string mk , string ml): make(mk), model(ml) {
+
+//         }
 
 
-        // common behaviour function
-        void start() {
-            cout<<"common feature 1 start the car" << endl;
-        }
+//         // common behaviour function
+//         void start() {
+//             cout<<"common feature 1 start the car" << endl;
+//         }
 
-        void stop() {
-            cout << "common feature 2 break the car" << endl;
-        }
+//         void stop() {
+//             cout << "common feature 2 break the car" << endl;
+//         }
 
-        void drive(){
-            cout << "common feature 3 drive the car" << endl;
-        }
+//         void drive(){
+//             cout << "common feature 3 drive the car" << endl;
+//         }
 
-        // special function of the car 
-        virtual void SpecialFunction () = 0;
+//         // special function of the car 
+//         virtual void SpecialFunction () = 0;
     
+// };
+
+
+
+// class ManualCar : public Car {
+// public:
+//     ManualCar(string mk, string mdl) : Car(mk, mdl) {}
+
+//     void changeGear() {
+//         cout << "Changing gear manually in " << make << " " << model << "." << endl;
+//     }
+
+//     // overide the special fuction according the  the use of the current car 
+//     void SpecialFunction() override {
+//         changeGear();
+//     }
+// };
+
+// class ElectricCar : public Car {
+// public:
+//     ElectricCar(string mk, string mdl) : Car(mk, mdl) {}
+
+//     void chargeBattery() {
+//         cout << "Charging battery of " << make << " " << model << "." << endl;
+//     }
+
+//     void SpecialFunction() override {
+//         chargeBattery();
+//     }
+// };
+
+
+// int main() {
+//     ManualCar manualCar("Toyota", "Corolla");
+//     ElectricCar electricCar("Tesla", "Model 3");
+
+//     cout << "--- Manual Car ---" << endl;
+//     manualCar.start();
+//     manualCar.drive();
+//     manualCar.SpecialFunction();
+//     manualCar.stop();
+
+//     cout << "\n--- Electric Car ---" << endl;
+//     electricCar.start();
+//     electricCar.drive();
+//     electricCar.SpecialFunction();
+//     electricCar.stop();
+
+//     return 0;
+// }
+
+// USING THE COMPOSITION -----------
+
+// Drive System Interface
+class DriveSystem {
+public:
+    virtual void specialFunction() = 0;
+    virtual ~DriveSystem() {}
+};
+
+class ManualDriveSystem : public DriveSystem {
+public:
+    void specialFunction() override {
+        cout << "Changing gear manually." << endl;
+    }
+};
+
+class ElectricDriveSystem : public DriveSystem {
+public:
+    void specialFunction() override {
+        cout << "Charging the battery." << endl;
+    }
 };
 
 
+class Car {
+private:
+    string make;
+    string model;
+    DriveSystem* driveSystem;  // Composition relationship
 
-class ManualCar : public Car {
 public:
-    ManualCar(string mk, string mdl) : Car(mk, mdl) {}
+    Car(string mk, string mdl, DriveSystem* ds)
+        : make(mk), model(mdl), driveSystem(ds) {}
 
-    void changeGear() {
-        cout << "Changing gear manually in " << make << " " << model << "." << endl;
+    void start() {
+        cout << make << " " << model << " is starting." << endl;
     }
 
-    // overide the special fuction according the  the use of the current car 
-    void SpecialFunction() override {
-        changeGear();
-    }
-};
-
-class ElectricCar : public Car {
-public:
-    ElectricCar(string mk, string mdl) : Car(mk, mdl) {}
-
-    void chargeBattery() {
-        cout << "Charging battery of " << make << " " << model << "." << endl;
+    void stop() {
+        cout << make << " " << model << " is stopping." << endl;
     }
 
-    void SpecialFunction() override {
-        chargeBattery();
+    void drive() {
+        cout << make << " " << model << " is driving." << endl;
+    }
+
+    void performSpecialFunction() {
+        driveSystem->specialFunction();
+    }
+
+    ~Car() {
+        delete driveSystem;
     }
 };
 
 
 int main() {
-    ManualCar manualCar("Toyota", "Corolla");
-    ElectricCar electricCar("Tesla", "Model 3");
-
     cout << "--- Manual Car ---" << endl;
+    Car manualCar("Toyota", "Corolla", new ManualDriveSystem());
     manualCar.start();
     manualCar.drive();
-    manualCar.SpecialFunction();
+    manualCar.performSpecialFunction();
     manualCar.stop();
 
     cout << "\n--- Electric Car ---" << endl;
+    Car electricCar("Tesla", "Model 3", new ElectricDriveSystem());
     electricCar.start();
     electricCar.drive();
-    electricCar.SpecialFunction();
+    electricCar.performSpecialFunction();
     electricCar.stop();
 
     return 0;

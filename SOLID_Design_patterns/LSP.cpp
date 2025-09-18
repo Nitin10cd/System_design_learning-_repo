@@ -1,4 +1,8 @@
 #include <iostream>
+#include <vector>
+#include <typeinfo>
+#include <stdexcept>
+
 using namespace std;
 
 class Account {
@@ -61,7 +65,7 @@ private:
 
 public:
     FixedTermAccount() { 
-        balance = 0; 
+        balance = 0;
     }
 
     void deposit(double amount) {
@@ -73,7 +77,8 @@ public:
         throw logic_error("Withdrawal not allowed in Fixed Term Account!");
     }
 };
-    
+
+//Client class
 class BankClient {
 private:
     vector<Account*> accounts;
@@ -85,13 +90,17 @@ public:
 
     void processTransactions() {
         for (Account* acc : accounts) {
-            acc->deposit(1000);  //All accounts allow deposits
+            acc->deposit(1000);
 
-            //Assuming all accounts support withdrawal (LSP Violation)
-            try {
-                acc->withdraw(500);
-            } catch (const logic_error& e) {
-                cout << "Exception: " << e.what() << endl;
+            //Checking account type explicitly
+            if (typeid(*acc) == typeid(FixedTermAccount)) {
+                cout << "Skipping withdrawal for Fixed Term Account.\n";
+            } else {
+                try {
+                    acc->withdraw(500);
+                } catch (const logic_error& e) {
+                    cout << "Exception: " << e.what() << endl;
+                }
             }
         }
     }
@@ -104,7 +113,7 @@ int main() {
     accounts.push_back(new FixedTermAccount());
 
     BankClient* client = new BankClient(accounts);
-    client->processTransactions(); //  Throws exception when withdrawing from FixedTermAccount
+    client->processTransactions();
 
     return 0;
 }
